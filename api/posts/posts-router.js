@@ -61,6 +61,85 @@ router.post('/', (req, res) => {
     
 })
 
+router.delete('/:id', (req,res) => {
+    Post.findById(req.params.id)
+    .then(post => {
+        if(!post){
+            res.status(404).json({
+                message: "The post with the specified ID does not exist"
+            })
+        } else {
+            Post.remove(req.params.id)
+            .then(removedPost => {
+
+                res.json(post)
+            })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: "The post could not be removed"
+        })
+    })
+   
+})
+
+router.get('/:id/comments', (req, res) =>{
+    
+    Post.findById(req.params.id)
+    .then(post => {
+        if(!post){
+            res.status(404).json({
+                message: "The post with the specified ID does not exist"
+            })
+        } else {
+            Post.findPostComments(req.params.id)
+            .then(postComments => {
+
+                res.json(postComments)
+            })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: "The comments information could not be retrieved"
+        })
+    })
+})
+
+router.put('/:id', (req,res) => {
+    const {title, contents} = req.body
+    if (!title || !contents) {
+        res.status(400).json({
+            message: "Please provide title and contents for the post"
+        })
+    } else{
+        Post.findById(req.params.id)
+        .then(post => {
+            if(!post){
+            res.status(404).json({
+                message: "The post with the specified ID does not exist"
+            })
+        } else {
+            
+            return Post.update(req.params.id, req.body)
+        }
+    })
+    .then(data => {
+        if(data) {
+            return Post.findById(req.params.id)
+        }
+    })
+    .then(post => {
+        res.json(post)
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: "The post information could not be modified"
+        })
+    })
+}
+})
 
 //export routes to server.js
 module.exports = router;
